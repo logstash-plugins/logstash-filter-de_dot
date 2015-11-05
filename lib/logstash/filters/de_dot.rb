@@ -36,22 +36,22 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
 
   private
   def rename_field(event, fieldref)
-    @logger.debug? and @logger.debug("preprocess", :event => event.to_hash.to_s)
-    @logger.debug? and @logger.debug("source field reference", :fieldref => fieldref)
+    @logger.debug? && @logger.debug("preprocess", :event => event.to_hash.to_s)
+    @logger.debug? && @logger.debug("source field reference", :fieldref => fieldref)
     newref = fieldref.gsub('.', @separator)
-    @logger.debug? and @logger.debug("replacement field reference", :newref => newref)
+    @logger.debug? && @logger.debug("replacement field reference", :newref => newref)
     event[newref] = event[fieldref]
-    @logger.debug? and @logger.debug("event with both new and old field references", :event => event.to_hash.to_s)
+    @logger.debug? && @logger.debug("event with both new and old field references", :event => event.to_hash.to_s)
     event.remove(fieldref)
-    @logger.debug? and @logger.debug("postprocess", :event => event.to_hash.to_s)
+    @logger.debug? && @logger.debug("postprocess", :event => event.to_hash.to_s)
   end
 
   public
   def filter(event)
     @separator = '][' if @nested
-    @logger.debug? and @logger.debug("Replace dots with separator", :separator => @separator)
+    @logger.debug? && @logger.debug("Replace dots with separator", :separator => @separator)
     @fields = event.to_hash.keys if @fields.nil?
-    @logger.debug? and @logger.debug("Act on these fields", :fields => @fields)
+    @logger.debug? && @logger.debug("Act on these fields", :fields => @fields)
     @fields.each { |ref| rename_field(event, ref) if !(ref =~ /\./).nil? }
     filter_matched(event)
   end # def filter
