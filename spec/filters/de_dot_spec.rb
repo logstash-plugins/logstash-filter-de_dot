@@ -13,6 +13,13 @@ describe LogStash::Filters::De_dot do
     subject.register
   end
 
+  describe "Incorrect separator" do
+    let(:special) { LogStash::Filters::De_dot.new({ "separator" => "." }) }
+    it "should raise an exception if separator has a '.' in it" do
+      expect { special.register }.to raise_error(ArgumentError)
+    end
+  end
+
   describe "Single field" do
     let(:attrs) { { "foo.bar" => "pass" } }
 

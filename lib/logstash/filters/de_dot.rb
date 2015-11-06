@@ -31,7 +31,8 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
 
   public
   def register
-    # Add instance variables, if any
+    raise ArgumentError, "separator cannot be '.'" unless (@separator =~ /\./).nil?
+    # Add instance variables here, if any
   end # def register
 
   private
