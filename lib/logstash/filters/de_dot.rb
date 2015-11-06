@@ -38,6 +38,12 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
   private
   def rename_field(event, fieldref)
     @logger.debug? && @logger.debug("de_dot: preprocess", :event => event.to_hash.to_s)
+    if @separator == ']['
+      @logger.debug? && @logger.debug("de_dot: fieldref pre-process", :fieldref => fieldref)
+      fieldref = '[' + fieldref if fieldref[0] != '['
+      fieldref = fieldref + ']' if fieldref[-1] != ']'
+      @logger.debug? && @logger.debug("de_dot: fieldref bounding square brackets should exist now", :fieldref => fieldref)
+    end
     @logger.debug? && @logger.debug("de_dot: source field reference", :fieldref => fieldref)
     newref = fieldref.gsub('.', @separator)
     @logger.debug? && @logger.debug("de_dot: replacement field reference", :newref => newref)
