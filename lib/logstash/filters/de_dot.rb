@@ -31,28 +31,28 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
 
   public
   def register
-    raise ArgumentError, "separator cannot be or contain '.'" unless (@separator =~ /\./).nil?
+    raise ArgumentError, "de_dot: separator cannot be or contain '.'" unless (@separator =~ /\./).nil?
     # Add instance variables here, if any
   end # def register
 
   private
   def rename_field(event, fieldref)
-    @logger.debug? && @logger.debug("preprocess", :event => event.to_hash.to_s)
-    @logger.debug? && @logger.debug("source field reference", :fieldref => fieldref)
+    @logger.debug? && @logger.debug("de_dot: preprocess", :event => event.to_hash.to_s)
+    @logger.debug? && @logger.debug("de_dot: source field reference", :fieldref => fieldref)
     newref = fieldref.gsub('.', @separator)
-    @logger.debug? && @logger.debug("replacement field reference", :newref => newref)
+    @logger.debug? && @logger.debug("de_dot: replacement field reference", :newref => newref)
     event[newref] = event[fieldref]
-    @logger.debug? && @logger.debug("event with both new and old field references", :event => event.to_hash.to_s)
+    @logger.debug? && @logger.debug("de_dot: event with both new and old field references", :event => event.to_hash.to_s)
     event.remove(fieldref)
-    @logger.debug? && @logger.debug("postprocess", :event => event.to_hash.to_s)
+    @logger.debug? && @logger.debug("de_dot: postprocess", :event => event.to_hash.to_s)
   end
 
   public
   def filter(event)
     @separator = '][' if @nested
-    @logger.debug? && @logger.debug("Replace dots with separator", :separator => @separator)
+    @logger.debug? && @logger.debug("de_dot: Replace dots with separator", :separator => @separator)
     @fields = event.to_hash.keys if @fields.nil?
-    @logger.debug? && @logger.debug("Act on these fields", :fields => @fields)
+    @logger.debug? && @logger.debug("de_dot: Act on these fields", :fields => @fields)
     @fields.each { |ref| rename_field(event, ref) if !(ref =~ /\./).nil? }
     filter_matched(event)
   end # def filter
