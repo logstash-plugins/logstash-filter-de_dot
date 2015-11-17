@@ -1,2 +1,9 @@
+## 0.1.1
+ - Fix issue #4, where fields specified by `fields => ` were added to events if
+   they were not present.
+ - Fixed a bug where objects (nested fields) were not properly deleted if there
+   were multiple levels and each had a dotted field name.
+ - Fix issue #3, where dynamic fields are not recognized properly because of the
+   instance variable.
 ## 0.1.0
  - Initial release

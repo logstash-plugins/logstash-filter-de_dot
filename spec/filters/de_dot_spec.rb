@@ -128,8 +128,37 @@ describe LogStash::Filters::De_dot do
       expect(event['[acme][roller][skates]']).to eq('coyote')
       expect(event.to_hash.keys).not_to include('foo.bar')
       expect(event['[foo][bar]']).to eq('nochange')
-      expect(event.to_hash.keys).not_to include('a.a')
+      expect(event.to_hash.keys).not_to include('a.b')
       expect(event['[a][b][c][d][e][f]']).to eq('finally')
+    end
+  end
+
+  describe "Multiple specific nested fields with some not present" do
+    let(:config) {
+      {
+        "nested" => true,
+        "fields" => [ "[acme][roller.skates]", "foo.bar", "[a.b][c.d][e.f]" ]
+      }
+    }
+    let(:attrs) {
+      {
+        "acme" => { "roller.skates" => "coyote" },
+        "a.b" => { "c.d" => { "e.f" => "finally"} }
+      }
+    }
+
+    it "should replace all dots with underscores within specified fields" do
+      subject.filter(event)
+      expect(event['acme']).not_to include('roller.skates')
+      expect(event['[acme][roller][skates]']).to eq('coyote')
+      expect(event.to_hash.keys).not_to include('a.b')
+      expect(event['[a][b][c][d][e][f]']).to eq('finally')
+    end
+
+    it "should not add [foo][bar]" do
+      subject.filter(event)
+      expect(event.to_hash.keys).not_to include('foo.bar')
+      expect(event.to_hash.keys).not_to include('foo')
     end
   end
 

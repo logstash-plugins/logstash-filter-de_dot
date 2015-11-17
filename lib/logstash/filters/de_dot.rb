@@ -36,6 +36,26 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
   end # def register
 
   private
+  def find_fieldref_for_delete(source)
+    # In cases where fieldref may look like [a.b][c.d][e.f], we only want to delete
+    # the first level at which the dotted field appears.
+    fieldref = ''
+    @logger.debug? && @logger.debug("de_dot: source fieldref for delete", :source => source)
+    # Iterate over each level of source
+    source.delete('[').split(']').each do |ref|
+      fieldref = fieldref + '['
+      if !(ref =~ /\./).nil?
+        # return when we find the first ref with a '.'
+        @logger.debug? && @logger.debug("de_dot: fieldref for delete", :fieldref => fieldref + ref + ']')
+        return fieldref + ref + ']'
+      else
+        fieldref = fieldref + ref + ']'
+        @logger.debug? && @logger.debug("de_dot: fieldref still building", :fieldref => fieldref)
+      end
+    end
+  end
+
+  private
   def rename_field(event, fieldref)
     @logger.debug? && @logger.debug("de_dot: preprocess", :event => event.to_hash.to_s)
     if @separator == ']['
@@ -49,7 +69,7 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
     @logger.debug? && @logger.debug("de_dot: replacement field reference", :newref => newref)
     event[newref] = event[fieldref]
     @logger.debug? && @logger.debug("de_dot: event with both new and old field references", :event => event.to_hash.to_s)
-    event.remove(fieldref)
+    event.remove(find_fieldref_for_delete(fieldref))
     @logger.debug? && @logger.debug("de_dot: postprocess", :event => event.to_hash.to_s)
   end
 
@@ -57,9 +77,17 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
   def filter(event)
     @separator = '][' if @nested
     @logger.debug? && @logger.debug("de_dot: Replace dots with separator", :separator => @separator)
-    @fields = event.to_hash.keys if @fields.nil?
-    @logger.debug? && @logger.debug("de_dot: Act on these fields", :fields => @fields)
-    @fields.each { |ref| rename_field(event, ref) if !(ref =~ /\./).nil? }
+    if @fields.nil?
+      fields = event.to_hash.keys
+    else
+      fields = @fields
+    end
+    @logger.debug? && @logger.debug("de_dot: Act on these fields", :fields => fields)
+    fields.each do |ref|
+      if event[ref]
+        rename_field(event, ref) if !(ref =~ /\./).nil?
+      end
+    end
     filter_matched(event)
   end # def filter
 end # class LogStash::Filters::De_dot
