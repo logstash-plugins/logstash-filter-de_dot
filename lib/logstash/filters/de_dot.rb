@@ -28,6 +28,10 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
   #
   config :fields, :validate => :array
 
+  public
+  def has_dot?(fieldref)
+    fieldref =~ /\./
+  end
 
   public
   def register
@@ -44,7 +48,7 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
     # Iterate over each level of source
     source.delete('[').split(']').each do |ref|
       fieldref = fieldref + '['
-      if !(ref =~ /\./).nil?
+      if has_dot?(ref)
         # return when we find the first ref with a '.'
         @logger.debug? && @logger.debug("de_dot: fieldref for delete", :fieldref => fieldref + ref + ']')
         return fieldref + ref + ']'
@@ -85,7 +89,7 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
     @logger.debug? && @logger.debug("de_dot: Act on these fields", :fields => fields)
     fields.each do |ref|
       if event[ref]
-        rename_field(event, ref) if !(ref =~ /\./).nil?
+        rename_field(event, ref) if has_dot?(ref)
       end
     end
     filter_matched(event)
