@@ -1,3 +1,5 @@
+# 0.1.2
+  - New dependency requirements for logstash-core for the 5.0 release
 ## 0.1.1
  - Fix issue #4, where fields specified by `fields => ` were added to events if
    they were not present.
