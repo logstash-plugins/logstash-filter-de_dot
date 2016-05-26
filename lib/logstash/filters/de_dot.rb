@@ -88,7 +88,7 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
     end
     @logger.debug? && @logger.debug("de_dot: Act on these fields", :fields => fields)
     fields.each do |ref|
-      if event.get(ref)
+      if event.include?(ref)
         rename_field(event, ref) if has_dot?(ref)
       end
     end

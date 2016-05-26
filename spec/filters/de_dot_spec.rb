@@ -215,4 +215,23 @@ describe LogStash::Filters::De_dot do
     end
   end
 
+  describe "Field values containing false" do
+    let(:config) {
+      {
+        "nested" => true,
+      }
+    }
+    let(:attrs) {
+      {
+        "coyote.won" => false
+      }
+    }
+
+    it "should not be ignored" do
+      subject.filter(event)
+      expect(event).not_to include('coyote.won')
+      expect(event.get('[coyote][won]')).to be false
+    end
+  end
+
 end
