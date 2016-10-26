@@ -26,7 +26,7 @@ describe LogStash::Filters::De_dot do
     it "should replace a dot with an underscore" do
       subject.filter(event)
       expect(event.to_hash.keys).not_to include('foo.bar')
-      expect(event['foo_bar']).to eq('pass')
+      expect(event.get('foo_bar')).to eq('pass')
     end
   end
 
@@ -37,7 +37,7 @@ describe LogStash::Filters::De_dot do
     it "should replace a dot with an underscore" do
       subject.filter(event)
       expect(event.to_hash.keys).not_to include('foo.bar')
-      expect(event['foo___bar']).to eq('pass')
+      expect(event.get('foo___bar')).to eq('pass')
     end
   end
 
@@ -47,13 +47,13 @@ describe LogStash::Filters::De_dot do
     it "should replace all dots with underscores" do
       subject.filter(event)
       expect(event.to_hash.keys).not_to include('acme.roller.skates')
-      expect(event['acme_roller_skates']).to eq('coyote')
+      expect(event.get('acme_roller_skates')).to eq('coyote')
     end
 
     it "should not change a field without dots" do
       subject.filter(event)
       expect(event.to_hash.keys).to include('nodot')
-      expect(event['nodot']).to eq('nochange')
+      expect(event.get('nodot')).to eq('nochange')
     end
   end
 
@@ -63,13 +63,13 @@ describe LogStash::Filters::De_dot do
     it "should replace all dots with underscores" do
       subject.filter(event)
       expect(event.to_hash.keys).not_to include('acme_roller.skates')
-      expect(event['acme_roller_skates']).to eq('coyote')
+      expect(event.get('acme_roller_skates')).to eq('coyote')
     end
 
     it "should not change a field without dots" do
       subject.filter(event)
       expect(event.to_hash.keys).to include('no_dot')
-      expect(event['no_dot']).to eq('nochange')
+      expect(event.get('no_dot')).to eq('nochange')
     end
   end
 
@@ -80,13 +80,13 @@ describe LogStash::Filters::De_dot do
     it "should convert dotted fields to sub-fields" do
       subject.filter(event)
       expect(event.to_hash.keys).not_to include('acme.roller.skates')
-      expect(event['[acme][roller][skates]']).to eq('coyote')
+      expect(event.get('[acme][roller][skates]')).to eq('coyote')
     end
 
     it "should not change a field without dots" do
       subject.filter(event)
       expect(event.to_hash.keys).to include('nodot')
-      expect(event['nodot']).to eq('nochange')
+      expect(event.get('nodot')).to eq('nochange')
     end
   end
 
@@ -96,14 +96,14 @@ describe LogStash::Filters::De_dot do
 
     it "should replace all dots with underscores within specified fields" do
       subject.filter(event)
-      expect(event['acme']).not_to include('roller.skates')
-      expect(event['[acme][roller_skates]']).to eq('coyote')
+      expect(event.get('acme')).not_to include('roller.skates')
+      expect(event.get('[acme][roller_skates]')).to eq('coyote')
     end
 
     it "should not change a field not listed, even with dots" do
       subject.filter(event)
       expect(event.to_hash.keys).to include('foo.bar')
-      expect(event['foo.bar']).to eq('nochange')
+      expect(event.get('foo.bar')).to eq('nochange')
     end
   end
 
@@ -124,12 +124,12 @@ describe LogStash::Filters::De_dot do
 
     it "should replace all dots with underscores within specified fields" do
       subject.filter(event)
-      expect(event['acme']).not_to include('roller.skates')
-      expect(event['[acme][roller][skates]']).to eq('coyote')
+      expect(event.get('acme')).not_to include('roller.skates')
+      expect(event.get('[acme][roller][skates]')).to eq('coyote')
       expect(event.to_hash.keys).not_to include('foo.bar')
-      expect(event['[foo][bar]']).to eq('nochange')
+      expect(event.get('[foo][bar]')).to eq('nochange')
       expect(event.to_hash.keys).not_to include('a.b')
-      expect(event['[a][b][c][d][e][f]']).to eq('finally')
+      expect(event.get('[a][b][c][d][e][f]')).to eq('finally')
     end
   end
 
@@ -149,10 +149,10 @@ describe LogStash::Filters::De_dot do
 
     it "should replace all dots with underscores within specified fields" do
       subject.filter(event)
-      expect(event['acme']).not_to include('roller.skates')
-      expect(event['[acme][roller][skates]']).to eq('coyote')
+      expect(event.get('acme')).not_to include('roller.skates')
+      expect(event.get('[acme][roller][skates]')).to eq('coyote')
       expect(event.to_hash.keys).not_to include('a.b')
-      expect(event['[a][b][c][d][e][f]']).to eq('finally')
+      expect(event.get('[a][b][c][d][e][f]')).to eq('finally')
     end
 
     it "should not add [foo][bar]" do
@@ -177,14 +177,14 @@ describe LogStash::Filters::De_dot do
 
     it "should replace all dots with underscores" do
       subject.filter(event)
-      expect(event["acme"]).not_to include('super.roller_skates')
-      expect(event['[acme][super_roller_skates']).to eq('coyote')
+      expect(event.get('acme')).not_to include('super.roller_skates')
+      expect(event.get('[acme][super_roller_skates')).to eq('coyote')
     end
 
     it "should not change a field without dots" do
       subject.filter(event)
       expect(event.to_hash.keys).to include('field_with')
-      expect(event['[field_with][no_dot]']).to eq('nochange')
+      expect(event.get('[field_with][no_dot]')).to eq('nochange')
     end
   end
 
@@ -204,14 +204,14 @@ describe LogStash::Filters::De_dot do
 
     it "should replace all dots with underscores" do
       subject.filter(event)
-      expect(event["acme"]).not_to include('super.roller_skates')
-      expect(event['[acme][super][roller_skates']).to eq('coyote')
+      expect(event.get('acme')).not_to include('super.roller_skates')
+      expect(event.get('[acme][super][roller_skates')).to eq('coyote')
     end
 
     it "should not change a field without dots" do
       subject.filter(event)
       expect(event.to_hash.keys).to include('field_with')
-      expect(event['[field_with][no_dot]']).to eq('nochange')
+      expect(event.get('[field_with][no_dot]')).to eq('nochange')
     end
   end
 

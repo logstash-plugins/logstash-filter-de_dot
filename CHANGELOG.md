@@ -1,3 +1,7 @@
+# 1.0.0
+  - Depend on the correct version of logstash-core-plugin-api to work with
+    Logstash 5.0
+  - Fix all event references to use event.get() and event.set() methodology
 # 0.1.3
   - Depend on logstash-core-plugin-api instead of logstash-core, removing the need to mass update plugins on major releases of logstash
 # 0.1.2
