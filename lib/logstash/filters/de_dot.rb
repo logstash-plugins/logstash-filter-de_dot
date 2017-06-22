@@ -19,10 +19,16 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
   # a different separator.
   config :nested, :validate => :boolean, :default => false
 
+  # If `recursive` is _true_, then recursively check sub-fields. It is recommended you
+  # only use this when specifying specific fields.
+  config :recursive, :validate => :boolean, :default => false
+
   # The `fields` array should contain a list of known fields to act on.
   # If undefined, all top-level fields will be checked.  Sub-fields must be
   # manually specified in the array.  For example: `["field.suffix","[foo][bar.suffix]"]`
-  # will result in "field_suffix" and nested or sub field ["foo"]["bar_suffix"]
+  # will result in "field_suffix" and nested or sub field ["foo"]["bar_suffix"].
+  #
+  # To check all sub-fields, enable recursive checking.
   #
   # WARNING: This is an expensive operation.
   #
@@ -61,20 +67,33 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
 
   private
   def rename_field(event, fieldref)
-    @logger.debug? && @logger.debug("de_dot: preprocess", :event => event.to_hash.to_s)
-    if @separator == ']['
+    if @separator == '][' || @recursive
       @logger.debug? && @logger.debug("de_dot: fieldref pre-process", :fieldref => fieldref)
       fieldref = '[' + fieldref if fieldref[0] != '['
       fieldref = fieldref + ']' if fieldref[-1] != ']'
       @logger.debug? && @logger.debug("de_dot: fieldref bounding square brackets should exist now", :fieldref => fieldref)
     end
-    @logger.debug? && @logger.debug("de_dot: source field reference", :fieldref => fieldref)
-    newref = fieldref.gsub('.', @separator)
-    @logger.debug? && @logger.debug("de_dot: replacement field reference", :newref => newref)
-    event.set(newref, event.get(fieldref))
-    @logger.debug? && @logger.debug("de_dot: event with both new and old field references", :event => event.to_hash.to_s)
-    event.remove(find_fieldref_for_delete(fieldref))
-    @logger.debug? && @logger.debug("de_dot: postprocess", :event => event.to_hash.to_s)
+
+    if has_dot?(fieldref)
+      @logger.debug? && @logger.debug("de_dot: preprocess", :event => event.to_hash.to_s)
+      @logger.debug? && @logger.debug("de_dot: source field reference", :fieldref => fieldref)
+      newref = fieldref.gsub('.', @separator)
+      @logger.debug? && @logger.debug("de_dot: replacement field reference", :newref => newref)
+      event.set(newref, event.get(fieldref))
+      @logger.debug? && @logger.debug("de_dot: event with both new and old field references", :event => event.to_hash.to_s)
+      event.remove(find_fieldref_for_delete(fieldref))
+      @logger.debug? && @logger.debug("de_dot: postprocess", :event => event.to_hash.to_s)
+      fieldref = newref
+    end
+
+    if @recursive
+      @logger.debug? && @logger.debug("de_dot: recursively process field reference", :fieldref => fieldref)
+      if event.get(fieldref).is_a?(Hash)
+        event.get(fieldref).keys.each do |ref|
+          rename_field(event, fieldref + '[' + ref + ']')
+        end
+      end
+    end
   end
 
   public
@@ -89,7 +108,7 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
     @logger.debug? && @logger.debug("de_dot: Act on these fields", :fields => fields)
     fields.each do |ref|
       if event.get(ref)
-        rename_field(event, ref) if has_dot?(ref)
+        rename_field(event, ref) if has_dot?(ref) || @recursive
       end
     end
     filter_matched(event)

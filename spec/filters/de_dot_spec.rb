@@ -215,4 +215,99 @@ describe LogStash::Filters::De_dot do
     end
   end
 
+  describe "Recusive processing" do
+    let(:config) { { "recursive" => true } }
+    let(:attrs) { { "acme" => { "roller.skates" => "coyote", "nodot" => "nochange" } } }
+
+    it "should replace dots in sub-fields to underscores" do
+      subject.filter(event)
+      expect(event.to_hash['acme'].keys).not_to include('roller.skates')
+      expect(event.get('[acme][roller_skates]')).to eq('coyote')
+    end
+
+    it "should not change a field without dots" do
+      subject.filter(event)
+      expect(event.to_hash['acme'].keys).to include('nodot')
+      expect(event.get('[acme][nodot]')).to eq('nochange')
+    end
+  end
+
+  describe "Recusive processing with nested fields" do
+    let(:config) { { "recursive" => true, "nested" => true } }
+    let(:attrs) { { "acme" => { "roller.skates" => "coyote", "nodot" => "nochange" } } }
+
+    it "should convert dotted sub-fields to nested sub-fields" do
+      subject.filter(event)
+      expect(event.to_hash['acme'].keys).not_to include('roller.skates')
+      expect(event.get('[acme][roller][skates]')).to eq('coyote')
+    end
+
+    it "should not change a field without dots" do
+      subject.filter(event)
+      expect(event.to_hash['acme'].keys).to include('nodot')
+      expect(event.get('[acme][nodot]')).to eq('nochange')
+    end
+  end
+
+  describe "Recusive processing with deeply nested fields" do
+    let(:config) { { "recursive" => true, "nested" => true } }
+    let(:attrs) { { "acme" => { "super.duper" => { "roller.skates" => "coyote", "nodot" => "nochange" } } } }
+
+    it "should convert dotted sub-fields to nested sub-fields" do
+      subject.filter(event)
+      expect(event.to_hash['acme'].keys).not_to include('super.duper')
+      expect(event.get('[acme][super][duper]').keys).not_to include('roller.skates')
+      expect(event.get('[acme][super][duper][roller][skates]')).to eq('coyote')
+    end
+
+    it "should not change a field without dots" do
+      subject.filter(event)
+      expect(event.get('[acme][super][duper]').keys).to include('nodot')
+      expect(event.get('[acme][super][duper][nodot]')).to eq('nochange')
+    end
+  end
+
+  describe "Recusive processing with specific nested fields" do
+    let(:config) { { "recursive" => true, "nested" => true, "fields" => [ "acme" ] } }
+    let(:attrs) { { "acme" => { "roller.skates" => "coyote" }, "foo.bar" => "nochange" } }
+
+    it "should convert dotted sub-fields to nested sub-fields within specified fields" do
+      subject.filter(event)
+      expect(event.to_hash['acme'].keys).not_to include('roller.skates')
+      expect(event.get('[acme][roller][skates]')).to eq('coyote')
+    end
+
+    it "should not change a field not listed, even with dots" do
+      subject.filter(event)
+      expect(event.to_hash.keys).to include('foo.bar')
+      expect(event.get('foo.bar')).to eq('nochange')
+    end
+  end
+
+  describe "Recusive processing with multiple specific nested fields" do
+    let(:config) {
+      {
+          "recursive" => true,
+          "nested" => true,
+          "fields" => [ "acme", "foo.bar", "a.b" ]
+      }
+    }
+    let(:attrs) {
+      {
+          "acme" => { "roller.skates" => "coyote" },
+          "foo.bar" => "nochange",
+          "a.b" => { "c.d" => { "e.f" => "finally"} }
+      }
+    }
+
+    it "should convert all dotted fields to sub-fields within specified fields" do
+      subject.filter(event)
+      expect(event.get('acme')).not_to include('roller.skates')
+      expect(event.get('[acme][roller][skates]')).to eq('coyote')
+      expect(event.to_hash.keys).not_to include('foo.bar')
+      expect(event.get('[foo][bar]')).to eq('nochange')
+      expect(event.to_hash.keys).not_to include('a.b')
+      expect(event.get('[a][b][c][d][e][f]')).to eq('finally')
+    end
+  end
 end

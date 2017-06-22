@@ -1,3 +1,6 @@
+# 1.1.0
+  - Add support for recursively searching sub-fields with the new `recusive =>`
+    config option
 # 1.0.0
   - Depend on the correct version of logstash-core-plugin-api to work with
     Logstash 5.0
