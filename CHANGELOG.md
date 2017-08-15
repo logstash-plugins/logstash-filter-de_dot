@@ -1,3 +1,6 @@
+## 1.0.2
+  - Fix some documentation issues
+
 # 1.0.0
   - Depend on the correct version of logstash-core-plugin-api to work with
     Logstash 5.0
