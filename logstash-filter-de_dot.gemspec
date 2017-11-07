@@ -1,8 +1,8 @@
 Gem::Specification.new do |s|
   s.name = 'logstash-filter-de_dot'
-  s.version         = '1.0.2'
+  s.version         = '1.0.3'
   s.licenses = ['Apache License (2.0)']
-  s.summary = "This filter removes dots from field names and replaces them with a different separator."
+  s.summary = "Computationally expensive filter that removes dots from a field name"
   s.description     = "This gem is a Logstash plugin required to be installed on top of the Logstash core pipeline using $LS_HOME/bin/logstash-plugin install gemname. This gem is not a stand-alone program"
   s.authors = ["Elastic"]
   s.email = 'info@elastic.co'
