@@ -1,3 +1,6 @@
+## 1.0.4
+  - fix failure of fieldnames with boolean value "false" #9
+
 ## 1.0.3
   - Update gemspec summary
 
