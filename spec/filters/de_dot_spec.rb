@@ -178,7 +178,7 @@ describe LogStash::Filters::De_dot do
     it "should replace all dots with underscores" do
       subject.filter(event)
       expect(event.get('acme')).not_to include('super.roller_skates')
-      expect(event.get('[acme][super_roller_skates')).to eq('coyote')
+      expect(event.get('[acme][super_roller_skates]')).to eq('coyote')
     end
 
     it "should not change a field without dots" do
