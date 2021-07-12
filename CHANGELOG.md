@@ -1,3 +1,7 @@
+## 1.1.0
+  - Add support for recursively searching sub-fields with the new `recusive =>`
+    config option
+
 ## 1.0.4
   - fix failure of fieldnames with boolean value "false" #9
 
