@@ -1,3 +1,6 @@
+## 1.1.0
+  - Add support for recursively searching sub-fields with the new `recusive =>` config option [#24](https://github.com/logstash-plugins/logstash-filter-de_dot/pull/24)
+
 ## 1.0.4
   - fix failure of fieldnames with boolean value "false" #9
 
