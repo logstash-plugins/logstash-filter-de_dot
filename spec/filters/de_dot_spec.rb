@@ -92,11 +92,29 @@ describe LogStash::Filters::De_dot do
     context "when nested fields overlaps scalar fields" do
       let(:config) { { "nested" => true } }
       let(:attrs) { { "request" => "GET", "request.path" => "/users" } }
-      let(:expected_tag) { '_de_dot_error' }
 
-      it "should tag the event as failed" do
-        subject.filter(event)
-        expect(event.get('tags')).to include(expected_tag)
+      shared_examples('catch and tag error') do
+        let(:expected_tag) { '_de_dot_error' }
+
+        context 'when the event is filtered' do
+          before(:each) { subject.filter(event) }
+
+          it 'tags the event with the expected tag' do
+            expect(event).to include('tags')
+            expect(event.get('tags')).to include(expected_tag)
+          end
+        end  
+      end  
+
+      context "when `tag_on_failure` is not provided" do
+        include_examples "catch and tag error"
+      end
+
+      context "when `tag_on_failure` is provided" do
+        include_examples "catch and tag error" do
+          let(:expected_tag) { "_my_custom_error" }
+          let(:config) { super().merge("tag_on_failure" => expected_tag) }
+        end
       end
     end
   end
