@@ -88,6 +88,17 @@ describe LogStash::Filters::De_dot do
       expect(event.to_hash.keys).to include('nodot')
       expect(event.get('nodot')).to eq('nochange')
     end
+    
+    context "when nested fields overlaps scalar fields" do
+      let(:config) { { "nested" => true } }
+      let(:attrs) { { "request" => "GET", "request.path" => "/users" } }
+      let(:expected_tag) { '_de_dot_error' }
+
+      it "should tag the event as failed" do
+        subject.filter(event)
+        expect(event.get('tags')).to include(expected_tag)
+      end
+    end
   end
 
   describe "Specific nested field" do
