@@ -1,3 +1,6 @@
+## 1.2.0
+  - Add support to tag on failures when de_dot filter encounter a problem during the processing of the event [#26](https://github.com/logstash-plugins/logstash-filter-de_dot/pull/26)
+
 ## 1.1.0
   - Add support for recursively searching sub-fields with the new `recusive =>` config option [#24](https://github.com/logstash-plugins/logstash-filter-de_dot/pull/24)
 

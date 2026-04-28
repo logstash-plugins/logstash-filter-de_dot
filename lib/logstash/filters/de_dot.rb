@@ -34,6 +34,9 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
   #
   config :fields, :validate => :array
 
+  # Tag to apply if the operation errors
+  config :tag_on_failure, :validate => :string, :default => '_de_dot_error'
+
   public
   def has_dot?(fieldref)
     fieldref =~ /\./
@@ -113,5 +116,10 @@ class LogStash::Filters::De_dot < LogStash::Filters::Base
       end
     end
     filter_matched(event)
+  rescue => ex
+    meta = { :exception => ex.message }
+    meta[:backtrace] = ex.backtrace if logger.debug?
+    logger.warn('Exception caught while applying de_dot filter', meta)
+    event.tag(@tag_on_failure)
   end # def filter
 end # class LogStash::Filters::De_dot
