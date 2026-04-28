@@ -90,7 +90,7 @@ Replace dots with this value.
 ===== `tag_on_failure`
 
   * Value type is <<string,string>>
-  * The default value for this setting is `_mutate_error`
+  * The default value for this setting is `_de_dot_error`
 
 If a failure occurs during the application of this de_dot filter, the provided tag is added to the event.
 
